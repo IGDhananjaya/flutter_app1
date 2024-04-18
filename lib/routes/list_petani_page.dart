@@ -3,25 +3,24 @@ import 'package:tugas_ui/models/petani.dart';
 import 'package:tugas_ui/services/apiStatic.dart';
 
 
+
 class DatasScreen extends StatefulWidget {
-  const DatasScreen({Key? key}) : super(key: key);
+  const DatasScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _DatasScreenState createState() => _DatasScreenState();
+  State<DatasScreen> createState() => _DatasScreenState();
 }
 
 class _DatasScreenState extends State<DatasScreen> {
-  late Future<Petani> futurePetani;
-
+  late Future<List<Petani>> futurePetani;
 
   @override
   void initState() {
     super.initState();
-    // futurePetani = ApiStatic.getPetani();
+    futurePetani = ApiStatic.getPetani();
   }
 
-    @override
+  @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -34,23 +33,34 @@ class _DatasScreenState extends State<DatasScreen> {
         //   title: const Text('Fetch Data Example'),
         // ),
         body: Center(
-          child: FutureBuilder<Petani>(
+          child: FutureBuilder<List<Petani>>(
             future: futurePetani,
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final petani = snapshot.data!;
-
-                return Text("${petani.nama}");
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                // Display a loading indicator while waiting for the future
+                return const CircularProgressIndicator();
               } else if (snapshot.hasError) {
-                return Text('${snapshot.error}');
+                // Display an error message if there's an error
+                return Text('Error: ${snapshot.error}');
+              } else if (snapshot.hasData) {
+                // Display the list of Petani if data is available
+                final List<Petani> petaniList = snapshot.data!;
+                return ListView.builder(
+                  itemCount: petaniList.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    // Display each Petani's name
+                    return Text('${petaniList[index].nama}');
+                  },
+                );
+              } else {
+                // Default case: Display a message when there's no data
+                return const Text('No data available');
               }
-
-              // By default, show a loading spinner.
-              return const CircularProgressIndicator();
             },
           ),
         ),
-    ),
-);
+      ),
+    );
+  }
 }
-}
+

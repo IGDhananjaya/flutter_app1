@@ -2,16 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:tugas_ui/models/data.dart';
 import 'package:tugas_ui/routes/about_page.dart';
 import 'package:tugas_ui/routes/books_screen.dart';
+import 'package:tugas_ui/routes/list_petani_page.dart';
 // import 'package:tugas_ui/routes/account_page.dart';
 import 'package:tugas_ui/routes/login_page.dart';
 // import 'package:tugas_ui/routes/login_page.dart';
 import 'package:tugas_ui/routes/long_list.dart';
 import 'package:tugas_ui/routes/post_page.dart';
+import 'package:tugas_ui/routes/post_photo_page.dart';
+import 'package:tugas_ui/routes/profileIG_page.dart';
 import 'package:tugas_ui/routes/profile_page.dart';
 import 'package:tugas_ui/routes/reels_page.dart';
 import 'package:tugas_ui/routes/search.dart';
-
-
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -29,9 +30,13 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
+  // const MyHomePage({Key? key, required this.title}) : super(key: key);
+  const MyHomePage({Key? key, required this.title, this.selectedIndex = 0})
+      : super(key: key);
   final String title;
+  final int selectedIndex;
+
+  // int get selectedIndex => _MyHomePageState()._selectedIndex;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -53,37 +58,53 @@ class _MyHomePageState extends State<MyHomePage> {
       ListViewPage(people: allData),
       const SearchPage(),
       ReelsPage(),
-      // TrySaveImage(), // Add TrySaveImage widget here
-      // ProfileGridView(),
-      // PostPageSQF(postsqf: post), // Pass the first PostSQF object to the PostPageSQF constructor
+      PostPhotoPage(), // Add TrySaveImage widget here
+      ProfileIgPage(),
+      DatasScreen(),
     ];
   }
-
-  
 
   final List<String> _appBarTitles = const [
     'Home',
     'Search',
     'Reels',
-    // 'Add Post',
-    // 'Add Post SQF',
-    // 'Post Page SQF',
+    'Add Post',
+    'Personal',
+    'Petani'
   ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+
+    // if (index == 4) {
+    //   ProfileIgPage();
+    // }
   }
 
   @override
   Widget build(BuildContext context) {
+    final int? selectedIndex =
+        ModalRoute.of(context)?.settings.arguments as int?;
+    if (selectedIndex != null) {
+      _selectedIndex = selectedIndex;
+    }
     return Scaffold(
       appBar: AppBar(
         title: Text(_appBarTitles[_selectedIndex]),
         backgroundColor: Colors.black12,
       ),
-      body: _screens[_selectedIndex],
+      // body: Column(
+      //   crossAxisAlignment: CrossAxisAlignment.stretch,
+      //   children: [
+      //     Expanded(child: _screens[_selectedIndex]),
+      //   ],
+      // ),
+      body: IndexedStack(
+        index: _selectedIndex,
+        children: _screens,
+      ),
       drawer: Drawer(
         child: Container(
           decoration: BoxDecoration(
@@ -102,8 +123,8 @@ class _MyHomePageState extends State<MyHomePage> {
             children: [
               DrawerHeader(
                 decoration: BoxDecoration(
-                    color: Colors.black12,
-                    ),
+                  color: Colors.black12,
+                ),
                 child: Text('Drawer Header'),
               ),
               ListTile(
@@ -201,21 +222,21 @@ class _MyHomePageState extends State<MyHomePage> {
               label: 'Reels',
               backgroundColor: Colors.black12,
             ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.person),
-            //   label: 'Add Post',
-            //   backgroundColor: Colors.black12,
-            // ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.person),
-            //   label: 'Add Post SQF',
-            //   backgroundColor: Colors.black12,
-            // ),
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.account_balance),
-            //   label: 'Post Page SQF',
-            //   backgroundColor: Colors.black12,
-            // ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.add_a_photo),
+              label: 'Add Post',
+              backgroundColor: Colors.black12,
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person),
+              label: 'Personal',
+              backgroundColor: Colors.black12,
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.family_restroom),
+              label: 'Petani List',
+              backgroundColor: Colors.black12,
+            ),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.black,

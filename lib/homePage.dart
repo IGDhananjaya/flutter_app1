@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tugas_ui/models/data.dart';
+import 'package:tugas_ui/models/petani.dart';
 import 'package:tugas_ui/routes/about_page.dart';
 import 'package:tugas_ui/routes/books_screen.dart';
 import 'package:tugas_ui/routes/list_petani_page.dart';
@@ -13,6 +14,7 @@ import 'package:tugas_ui/routes/profileIG_page.dart';
 import 'package:tugas_ui/routes/profile_page.dart';
 import 'package:tugas_ui/routes/reels_page.dart';
 import 'package:tugas_ui/routes/search.dart';
+import 'package:tugas_ui/services/apiStatic.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
@@ -30,6 +32,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
+
   // const MyHomePage({Key? key, required this.title}) : super(key: key);
   const MyHomePage({Key? key, required this.title, this.selectedIndex = 0})
       : super(key: key);
@@ -45,6 +48,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _selectedIndex = 0;
   final List<String> people = ['Jojo', 'Todo', 'Desri'];
+  late final Future<List<Petani>> futurePetani;
+  final ApiStatic apiService = ApiStatic();
 
   late final List<Widget> _screens;
   // final List<PostSQF> postsqf = allData.map((post) => PostSQF.fromMap(post)).toList();
@@ -54,13 +59,14 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     // Get the first PostSQF object from the allData list
     // final PostSQF post = allData.first;
+    futurePetani = ApiStatic.getPetani();
     _screens = [
       ListViewPage(people: allData),
       const SearchPage(),
       ReelsPage(),
       PostPhotoPage(), // Add TrySaveImage widget here
       ProfileIgPage(),
-      DatasScreen(),
+      // DatasScreen(),
     ];
   }
 
@@ -70,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
     'Reels',
     'Add Post',
     'Personal',
-    'Petani'
+    // 'Petani'
   ];
 
   void _onItemTapped(int index) {
@@ -166,6 +172,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 },
               ),
+              ListTile(
+                title: const Text('List Petani'),
+                trailing: const Icon(Icons.family_restroom),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => DatasScreen(futurePetani: futurePetani,)),
+                  );
+                },
+              ),
               Divider(),
               ListTile(
                 title: const Text('Information'),
@@ -232,11 +248,11 @@ class _MyHomePageState extends State<MyHomePage> {
               label: 'Personal',
               backgroundColor: Colors.black12,
             ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.family_restroom),
-              label: 'Petani List',
-              backgroundColor: Colors.black12,
-            ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.family_restroom),
+            //   label: 'Petani List',
+            //   backgroundColor: Colors.black12,
+            // ),
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: Colors.black,

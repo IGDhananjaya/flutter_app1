@@ -58,29 +58,40 @@ class ApiStatic {
   //   }
   // }
 
-static Future<List<Petani>> getPetani() async {
-  final response =
-      await http.get(Uri.parse('https://dev.wefgis.com/api/petani?s'));
+  static Future<List<Petani>> getPetani() async {
+    try {
+      final response = await http.get(
+        Uri.parse('https://dev.wefgis.com/api/petani?s'),
+        headers: {
+          'Authorization': 'Bearer $_token', // Adding the token to the headers
+        },
+      );
 
-  if (response.statusCode == 200) {
-    // If the server returns a 200 OK response,
-    // then parse the JSON.
-    var json = jsonDecode(response.body);
-    final data = json['data'];
+      if (response.statusCode == 200) {
+        // If the server returns a 200 OK response,
+        // then parse the JSON.
+        var json = jsonDecode(response.body);
+        final data = json['data'];
 
-    // Check if data is a list and is not empty
-    if (data is List && data.isNotEmpty) {
-      // Convert each element of the list to Petani object
-      return data.map((e) => Petani.fromJson(e as Map<String, dynamic>)).toList();
-    } else {
-      throw Exception('Data is empty or not in the expected format');
+        // Check if data is a list and is not empty
+        if (data is List && data.isNotEmpty) {
+          // Convert each element of the list to Petani object
+          return data
+              .map((e) => Petani.fromJson(e as Map<String, dynamic>))
+              .toList();
+        } else {
+          throw Exception('Data is empty or not in the expected format');
+        }
+      } else {
+        // If the server does not return a 200 OK response,
+        // throw an exception.
+        throw Exception('Failed to load data');
+      }
+    } catch (e) {
+      // Catching any exceptions that might occur during the execution
+      throw Exception('Error: $e');
     }
-  } else {
-    // If the server does not return a 200 OK response,
-    // throw an exception.
-    throw Exception('Failed to load data');
   }
-}
 
   static Future<List<Petani>> getPetaniFilter(
       int pageKey, String _s, String _selectedChoice) async {
@@ -109,61 +120,97 @@ static Future<List<Petani>> getPetani() async {
     }
   }
 
-  static Future<List<Kelompok>> getKelompokTani() async {
-    try {
-      final response =
-          await http.get(Uri.parse("$host/api/kelompoktani"), headers: {
-        'Authorization': 'Bearer ' + _token,
-      });
-      if (response.statusCode == 200) {
-        var json = jsonDecode(response.body);
-        final parsed = json.cast<Map<String, dynamic>>();
-        return parsed.map<Kelompok>((json) => Kelompok.fromJson(json)).toList();
-      } else {
-        return [];
-      }
-    } catch (e) {
-      return [];
-    }
-  }
+  // static Future<List<Kelompok>> getKelompokTani() async {
+  //   try {
+  //     final response =
+  //         await http.get(Uri.parse("$host/api/kelompoktani"), headers: {
+  //       'Authorization': 'Bearer ' + _token,
+  //     });
+  //     if (response.statusCode == 200) {
+  //       var json = jsonDecode(response.body);
+  //       final parsed = json.cast<Map<String, dynamic>>();
+  //       return parsed.map<Kelompok>((json) => Kelompok.fromJson(json)).toList();
+  //     } else {
+  //       return [];
+  //     }
+  //   } catch (e) {
+  //     return [];
+  //   }
+  // }
 
-  static Future<ErrorMSG> savePetani(id, petani, filepath) async {
-    try {
-      var url = Uri.parse('$host/api/petani');
-      if (id != 0) {
-        url = Uri.parse('$host/api/petani/' + id.toString());
-      }
-      var request = http.MultipartRequest('POST', url);
-      request.fields['nama'] = petani['nama'];
-      request.fields['nik'] = petani['nik'];
-      request.fields['alamat'] = petani['alamat'];
-      request.fields['telp'] = petani['telp'];
-      request.fields['status'] = petani['status'];
-      request.fields['id_kelompok_tani'] =
-          petani['id_kelompok_tani'].toString();
-      if (filepath != '') {
-        request.files.add(await http.MultipartFile.fromPath('foto', filepath));
-      }
-      request.headers.addAll({
-        'Authorization': 'Bearer ' + _token,
-      });
-      var response = await request.send();
-      //final response = await http.post(Uri.parse('$_host/panen'), body:_panen);
-      if (response.statusCode == 200) {
-        //return ErrorMSG.fromJson(jsonDecode(response.body));
-        final respStr = await response.stream.bytesToString();
-        //print(jsonDecode(respStr));
-        return ErrorMSG.fromJson(jsonDecode(respStr));
-      } else {
-        //return ErrorMSG.fromJson(jsonDecode(response.body));
-        return ErrorMSG(success: false, message: 'err Request');
-      }
-    } catch (e) {
-      ErrorMSG responseRequest =
-          ErrorMSG(success: false, message: 'error caught: $e');
-      return responseRequest;
+  // static Future<ErrorMSG> savePetani(id, petani, filepath) async {
+  //   try {
+  //     var url = Uri.parse('$host/api/petani');
+  //     if (id != 0) {
+  //       url = Uri.parse('$host/api/petani/' + id.toString());
+  //     }
+  //     var request = http.MultipartRequest('POST', url);
+  //     request.fields['nama'] = petani['nama'];
+  //     request.fields['nik'] = petani['nik'];
+  //     request.fields['alamat'] = petani['alamat'];
+  //     request.fields['telp'] = petani['telp'];
+  //     request.fields['status'] = petani['status'];
+  //     request.fields['id_kelompok_tani'] =
+  //         petani['id_kelompok_tani'].toString();
+  //     if (filepath != '') {
+  //       request.files.add(await http.MultipartFile.fromPath('foto', filepath));
+  //     }
+  //     request.headers.addAll({
+  //       'Authorization': 'Bearer ' + _token,
+  //     });
+  //     var response = await request.send();
+  //     //final response = await http.post(Uri.parse('$_host/panen'), body:_panen);
+  //     if (response.statusCode == 200) {
+  //       //return ErrorMSG.fromJson(jsonDecode(response.body));
+  //       final respStr = await response.stream.bytesToString();
+  //       //print(jsonDecode(respStr));
+  //       return ErrorMSG.fromJson(jsonDecode(respStr));
+  //     } else {
+  //       //return ErrorMSG.fromJson(jsonDecode(response.body));
+  //       return ErrorMSG(success: false, message: 'err Request');
+  //     }
+  //   } catch (e) {
+  //     ErrorMSG responseRequest =
+  //         ErrorMSG(success: false, message: 'error caught: $e');
+  //     return responseRequest;
+  //   }
+  // }
+
+  static Future<ErrorMSG> savePetani(int id, Petani petani, String filePath) async {
+  try {
+    var url = Uri.parse('$host/api/petani');
+    if (id != 0) {
+      url = Uri.parse('$host/api/petani/$id');
     }
+
+    var request = http.MultipartRequest(id != 0 ? 'PUT' : 'POST', url);
+    request.fields['nama'] = petani.nama!;
+    request.fields['nik'] = petani.nik!;
+    request.fields['alamat'] = petani.alamat!;
+    request.fields['telp'] = petani.telp!;
+    request.fields['status'] = petani.status!;
+    request.fields['id_kelompok_tani'] = petani.idKelompokTani?.toString() ?? '';
+
+    if (filePath.isNotEmpty) {
+      request.files.add(await http.MultipartFile.fromPath('foto', filePath));
+    }
+
+    request.headers.addAll({
+      'Authorization': 'Bearer $_token',
+    });
+
+    var response = await request.send();
+
+    if (response.statusCode == 200) {
+      final respStr = await response.stream.bytesToString();
+      return ErrorMSG.fromJson(jsonDecode(respStr));
+    } else {
+      return ErrorMSG(success: false, message: 'Error: ${response.statusCode}');
+    }
+  } catch (e) {
+    return ErrorMSG(success: false, message: 'Error caught: $e');
   }
+}
 
   static Future<ErrorMSG> deletePetani(id) async {
     try {

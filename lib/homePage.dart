@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
     // Get the first PostSQF object from the allData list
     // final PostSQF post = allData.first;
-    futurePetani = ApiStatic.getPetani();
+    futurePetani = ApiStatic().fetchPetani();
     _screens = [
       ListViewPage(people: allData),
       const SearchPage(),

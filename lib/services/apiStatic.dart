@@ -58,40 +58,64 @@ class ApiStatic {
   //   }
   // }
 
-  static Future<List<Petani>> getPetani() async {
+  Future<List<Petani>> fetchPetani() async {
+    http.Response response;
     try {
-      final response = await http.get(
-        Uri.parse('https://dev.wefgis.com/api/petani?s'),
-        headers: {
-          'Authorization': 'Bearer $_token', // Adding the token to the headers
-        },
-      );
+      response =
+          await http.get(Uri.parse('https://dev.wefgis.com/api/petani?s'));
 
       if (response.statusCode == 200) {
-        // If the server returns a 200 OK response,
-        // then parse the JSON.
         var json = jsonDecode(response.body);
         final data = json['data'];
 
-        // Check if data is a list and is not empty
-        if (data is List && data.isNotEmpty) {
-          // Convert each element of the list to Petani object
-          return data
-              .map((e) => Petani.fromJson(e as Map<String, dynamic>))
-              .toList();
+        if (data is List) {
+          return data.map((petaniJson) => Petani.fromJson(petaniJson)).toList();
         } else {
-          throw Exception('Data is empty or not in the expected format');
+          throw Exception('Data is not in the expected format');
         }
       } else {
-        // If the server does not return a 200 OK response,
-        // throw an exception.
         throw Exception('Failed to load data');
       }
     } catch (e) {
-      // Catching any exceptions that might occur during the execution
-      throw Exception('Error: $e');
+      // Tangani kesalahan jika terjadi
+      return []; // Return an empty list if there's an error
     }
   }
+
+  // static Future<List<Petani>> getPetani() async {
+  //   try {
+  //     final response = await http.get(
+  //       Uri.parse('https://dev.wefgis.com/api/petani?s'),
+  //       headers: {
+  //         'Authorization': 'Bearer $_token', // Adding the token to the headers
+  //       },
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       // If the server returns a 200 OK response,
+  //       // then parse the JSON.
+  //       var json = jsonDecode(response.body);
+  //       final data = json['data'];
+
+  //       // Check if data is a list and is not empty
+  //       if (data is List && data.isNotEmpty) {
+  //         // Convert each element of the list to Petani object
+  //         return data
+  //             .map((e) => Petani.fromJson(e as Map<String, dynamic>))
+  //             .toList();
+  //       } else {
+  //         throw Exception('Data is empty or not in the expected format');
+  //       }
+  //     } else {
+  //       // If the server does not return a 200 OK response,
+  //       // throw an exception.
+  //       throw Exception('Failed to load data');
+  //     }
+  //   } catch (e) {
+  //     // Catching any exceptions that might occur during the execution
+  //     throw Exception('Error: $e');
+  //   }
+  // }
 
   static Future<List<Petani>> getPetaniFilter(
       int pageKey, String _s, String _selectedChoice) async {
@@ -176,41 +200,114 @@ class ApiStatic {
   //   }
   // }
 
-  static Future<ErrorMSG> savePetani(int id, Petani petani, String filePath) async {
-  try {
-    var url = Uri.parse('$host/api/petani');
-    if (id != 0) {
-      url = Uri.parse('$host/api/petani/$id');
+  Future<Petani> createPetani(Petani petani) async {
+    final response = await http.post(
+      Uri.parse('https://dev.wefgis.com/api/petani'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'id_kelompok_tani': petani.idKelompokTani,
+        'nama': petani.nama,
+        'nik': petani.nik,
+        'alamat': petani.alamat,
+        'telp': petani.telp,
+        'foto': petani.foto,
+        'status': petani.status,
+        'nama_kelompok': petani.namaKelompok,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      return Petani.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Failed to create petani');
     }
+  }
 
-    var request = http.MultipartRequest(id != 0 ? 'PUT' : 'POST', url);
-    request.fields['nama'] = petani.nama!;
-    request.fields['nik'] = petani.nik!;
-    request.fields['alamat'] = petani.alamat!;
-    request.fields['telp'] = petani.telp!;
-    request.fields['status'] = petani.status!;
-    request.fields['id_kelompok_tani'] = petani.idKelompokTani?.toString() ?? '';
-
-    if (filePath.isNotEmpty) {
-      request.files.add(await http.MultipartFile.fromPath('foto', filePath));
+  // Fetch all kelompok tani
+  Future<List<Kelompok>> getKelompokTani() async {
+    try {
+      final response =
+          await http.get(Uri.parse("$host/api/kelompoktani"), headers: {
+        'Authorization': 'Bearer ' + _token,
+      });
+      if (response.statusCode == 200) {
+        var json = jsonDecode(response.body);
+        final parsed = json.cast<Map<String, dynamic>>();
+        return parsed.map<Kelompok>((json) => Kelompok.fromJson(json)).toList();
+      } else {
+        return [];
+      }
+    } catch (e) {
+      return [];
     }
+  }
 
-    request.headers.addAll({
-      'Authorization': 'Bearer $_token',
-    });
-
-    var response = await request.send();
+  // Update an existing petani
+  Future<Petani> updatePetani(Petani petani) async {
+    final response = await http.put(
+      Uri.parse('https://dev.wefgis.com/api/petani/${petani.idPenjual}'),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'id_kelompok_tani': petani.idKelompokTani,
+        'nama': petani.nama,
+        'nik': petani.nik,
+        'alamat': petani.alamat,
+        'telp': petani.telp,
+        'foto': petani.foto,
+        'status': petani.status,
+        'nama_kelompok': petani.namaKelompok,
+      }),
+    );
 
     if (response.statusCode == 200) {
-      final respStr = await response.stream.bytesToString();
-      return ErrorMSG.fromJson(jsonDecode(respStr));
+      return Petani.fromJson(jsonDecode(response.body));
     } else {
-      return ErrorMSG(success: false, message: 'Error: ${response.statusCode}');
+      throw Exception('Failed to update petani');
     }
-  } catch (e) {
-    return ErrorMSG(success: false, message: 'Error caught: $e');
   }
-}
+
+  // static Future<ErrorMSG> savePetani(
+  //     int id, Petani petani, String filePath) async {
+  //   try {
+  //     var url = Uri.parse('$host/api/petani');
+  //     if (id != 0) {
+  //       url = Uri.parse('$host/api/petani/$id');
+  //     }
+
+  //     var request = http.MultipartRequest(id != 0 ? 'PUT' : 'POST', url);
+  //     request.fields['nama'] = petani.nama!;
+  //     request.fields['nik'] = petani.nik!;
+  //     request.fields['alamat'] = petani.alamat!;
+  //     request.fields['telp'] = petani.telp!;
+  //     request.fields['status'] = petani.status!;
+  //     request.fields['id_kelompok_tani'] =
+  //         petani.idKelompokTani?.toString() ?? '';
+
+  //     if (filePath.isNotEmpty) {
+  //       request.files.add(await http.MultipartFile.fromPath('foto', filePath));
+  //     }
+
+  //     request.headers.addAll({
+  //       'Authorization': 'Bearer $_token',
+  //     });
+
+  //     var response = await request.send();
+
+  //     if (response.statusCode == 200) {
+  //       final respStr = await response.stream.bytesToString();
+  //       return ErrorMSG.fromJson(jsonDecode(respStr));
+  //     } else {
+  //       return ErrorMSG(
+  //           success: false, message: 'Error: ${response.statusCode}');
+  //     }
+  //   } catch (e) {
+  //     return ErrorMSG(success: false, message: 'Error caught: $e');
+  //   }
+  // }
 
   static Future<ErrorMSG> deletePetani(id) async {
     try {

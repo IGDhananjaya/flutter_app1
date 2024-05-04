@@ -19,6 +19,7 @@ class ApiStatic {
   static getHost() {
     return host;
   }
+  
   // static Future<List<Petani>> getPetani() async{
   //   List<Petani> petani=[];
   //   for (var i = 0; i < 10; i++) {

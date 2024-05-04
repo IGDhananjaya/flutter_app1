@@ -14,6 +14,19 @@ class DatasScreen extends StatefulWidget {
 }
 
 class _DatasScreenState extends State<DatasScreen> {
+  late final ApiStatic _apistatic;
+
+  @override
+  void initState() {
+    super.initState();
+    _apistatic = ApiStatic();
+  }
+
+  // Fungsi untuk memperbarui data dari futurePetani
+  void refreshData() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,13 +41,17 @@ class _DatasScreenState extends State<DatasScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.add),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              // Navigasi ke halaman TambahEditPetaniPage
+              await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => TambahEditPetaniPage(),
                 ),
               );
+
+              // Memanggil fungsi refreshData setelah kembali dari TambahEditPetaniPage
+              refreshData();
             },
           ),
         ],
@@ -72,17 +89,11 @@ class _DatasScreenState extends State<DatasScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    // CircleAvatar(
-                                    //   backgroundImage:
-                                    //       NetworkImage("${petaniList[index].foto}"),
-                                    //   radius: 20,
-                                    // ),
                                     const SizedBox(width: 16),
                                     Text(
                                       '${petaniList[index].nama}',
                                       style: const TextStyle(
                                         fontSize: 18,
-                                        // fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ],
@@ -91,9 +102,9 @@ class _DatasScreenState extends State<DatasScreen> {
                                   children: [
                                     IconButton(
                                       icon: const Icon(Icons.edit),
-                                      onPressed: () {
-                                        // Add code for edit action here
-                                        Navigator.push(
+                                      onPressed: () async {
+                                        // Navigasi ke halaman TambahEditPetaniPage dengan data petani yang ingin diubah
+                                        await Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
@@ -102,40 +113,64 @@ class _DatasScreenState extends State<DatasScreen> {
                                             ),
                                           ),
                                         );
+
+                                        // Memanggil fungsi refreshData setelah kembali dari TambahEditPetaniPage
+                                        refreshData();
                                       },
                                     ),
                                     IconButton(
-                                      icon: Icon(Icons.delete),
+                                      icon: const Icon(Icons.delete),
                                       onPressed: () async {
                                         final confirmed = await showDialog(
                                           context: context,
                                           builder: (context) {
                                             return AlertDialog(
-                                              title: Text('Confirm Delete'),
-                                              content: Text(
+                                              title:
+                                                  const Text('Confirm Delete'),
+                                              content: const Text(
                                                   'Are you sure you want to delete this petani?'),
                                               actions: [
                                                 TextButton(
-                                                  child: Text('Cancel'),
+                                                  child: const Text('Cancel'),
                                                   onPressed: () {
                                                     Navigator.of(context)
                                                         .pop(false);
                                                   },
                                                 ),
                                                 TextButton(
-                                                  child: Text('Delete'),
-                                                  onPressed: () {
-                                                    // Add code for delete action here
-                                                    Navigator.of(context)
-                                                        .pop(true);
+                                                  child: const Text('Delete'),
+                                                  onPressed: () async {
+                                                    try {
+                                                      final idPenjual =
+                                                          petaniList[index]
+                                                              .idPenjual;
+                                                      if (idPenjual != null) {
+                                                        await ApiStatic
+                                                            .deletePetani(
+                                                                idPenjual); // Use class name directly
+                                                        setState(() {});
+                                                      }
+                                                    } catch (e) {
+                                                      ScaffoldMessenger.of(
+                                                              context)
+                                                          .showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                              'Failed to delete petani: $e'),
+                                                        ),
+                                                      );
+                                                    }
+                                                    Navigator.pop(
+                                                        context, true);
                                                   },
                                                 ),
                                               ],
                                             );
                                           },
                                         );
-                                        if (confirmed) {
-                                          // Add code for delete action here
+                                        if (confirmed != null && confirmed) {
+                                          // Change here
+                                          refreshData(); // Add this line to refresh data
                                         }
                                       },
                                     ),

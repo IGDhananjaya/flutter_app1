@@ -3,7 +3,7 @@ class Kelompok {
       required  this.idKelompokTani,
       required  this.namaKelompok,
     });
-    int idKelompokTani;
+    String idKelompokTani;
     String namaKelompok;
     factory Kelompok.fromJson(Map<String, dynamic> json) => Kelompok(
         idKelompokTani: json["id_kelompok_tani"],

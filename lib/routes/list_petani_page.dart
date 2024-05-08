@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:tugas_ui/models/petani.dart';
-import 'package:tugas_ui/routes/TambahEdit_Petani_Page.dart';
+import 'package:tugas_ui/routes/EditPetaniPage.dart';
+import 'package:tugas_ui/routes/TambahPetaniPage.dart';
 import 'package:tugas_ui/routes/detail_petani_page.dart';
 import 'package:tugas_ui/services/apiStatic.dart';
 
 class DatasScreen extends StatefulWidget {
-  const DatasScreen({super.key, required this.futurePetani});
+  const DatasScreen({Key? key, required this.futurePetani}) : super(key: key);
 
   final Future<List<Petani>> futurePetani;
 
@@ -14,15 +15,14 @@ class DatasScreen extends StatefulWidget {
 }
 
 class _DatasScreenState extends State<DatasScreen> {
-  late final ApiStatic _apistatic;
+  late final ApiStatic _apiStatic;
 
   @override
   void initState() {
     super.initState();
-    _apistatic = ApiStatic();
+    _apiStatic = ApiStatic();
   }
 
-  // Fungsi untuk memperbarui data dari futurePetani
   void refreshData() {
     setState(() {});
   }
@@ -42,15 +42,12 @@ class _DatasScreenState extends State<DatasScreen> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () async {
-              // Navigasi ke halaman TambahEditPetaniPage
               await Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => TambahEditPetaniPage(),
+                  builder: (context) => TambahPetaniPage(petani: Petani(),),
                 ),
               );
-
-              // Memanggil fungsi refreshData setelah kembali dari TambahEditPetaniPage
               refreshData();
             },
           ),
@@ -103,18 +100,15 @@ class _DatasScreenState extends State<DatasScreen> {
                                     IconButton(
                                       icon: const Icon(Icons.edit),
                                       onPressed: () async {
-                                        // Navigasi ke halaman TambahEditPetaniPage dengan data petani yang ingin diubah
                                         await Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                TambahEditPetaniPage(
+                                                EditPetaniPage(
                                               petani: petaniList[index],
                                             ),
                                           ),
                                         );
-
-                                        // Memanggil fungsi refreshData setelah kembali dari TambahEditPetaniPage
                                         refreshData();
                                       },
                                     ),
@@ -145,9 +139,11 @@ class _DatasScreenState extends State<DatasScreen> {
                                                           petaniList[index]
                                                               .idPenjual;
                                                       if (idPenjual != null) {
+                                                        final apiInstance =
+                                                            ApiStatic(); // Create an instance of ApiStatic
                                                         await ApiStatic
                                                             .deletePetani(
-                                                                idPenjual); // Use class name directly
+                                                                idPenjual); // Call deletePetani on the instance
                                                         setState(() {});
                                                       }
                                                     } catch (e) {
@@ -169,8 +165,7 @@ class _DatasScreenState extends State<DatasScreen> {
                                           },
                                         );
                                         if (confirmed != null && confirmed) {
-                                          // Change here
-                                          refreshData(); // Add this line to refresh data
+                                          refreshData();
                                         }
                                       },
                                     ),

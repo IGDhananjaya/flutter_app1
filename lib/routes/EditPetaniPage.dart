@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tugas_ui/homePage.dart';
 import 'package:tugas_ui/models/kelompokTani.dart';
 import 'package:tugas_ui/models/petani.dart';
 import 'package:tugas_ui/routes/list_petani_page.dart';
@@ -128,7 +129,7 @@ class _EditPetaniPageState extends State<EditPetaniPage> {
       );
     } else {
       // If it's an existing petani, update the petani with the provided data
-      await ApiStatic.updatePetani(Petani(
+      await ApiStatic().updatePetani(Petani(
         idPenjual: petani.idPenjual,
         idKelompokTani: idKelompok,
         nama: _namaController.text,
@@ -151,7 +152,7 @@ class _EditPetaniPageState extends State<EditPetaniPage> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => DatasScreen(futurePetani: futurePetani),
+        builder: (context) => MyHomePage(title: ""),
       ),
     );
   } catch (e) {
